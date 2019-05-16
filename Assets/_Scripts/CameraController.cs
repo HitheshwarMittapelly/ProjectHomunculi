@@ -17,7 +17,7 @@ public class CameraController : MonoBehaviour {
 	void Update () {
 		float vertical = Input.GetAxis("Mouse Y") * sensitivity;
 		if (vertical != 0) {
-			Debug.Log("Moving mouse");
+			//Debug.Log("Moving mouse");
 		}
 		composer.m_TrackedObjectOffset.y += vertical;
 		composer.m_TrackedObjectOffset.y = Mathf.Clamp(composer.m_TrackedObjectOffset.y, -5, 5);

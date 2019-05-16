@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour {
-	[SerializeField]
-	private float moveSpeed = 3f;
-	[SerializeField]
-	private float turnSpeed = 5f;
+	
+	public float moveSpeed = 3f;
+	
+	public float turnSpeed = 5f;
 
 	private CharacterController characterController;
 	private Animator animator;
@@ -25,7 +25,7 @@ public class PlayerMovement : MonoBehaviour {
 		float vertical = Input.GetAxis("Vertical");
 		
 		
-		animator.SetFloat("Trigger", vertical);
+		animator.SetFloat("Trigger", Mathf.Abs(vertical));
 		transform.Rotate(Vector3.up, horizontal * turnSpeed * Time.deltaTime);
 		if (vertical!=0) {
 			characterController.SimpleMove(vertical * moveSpeed * transform.forward);

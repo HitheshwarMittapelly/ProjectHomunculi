@@ -22,17 +22,7 @@ public class Weapon : MonoBehaviour {
 
 
 	void Update () {
-		if(animator.GetCurrentAnimatorStateInfo(0).IsName("AxeAttack")|| animator.GetCurrentAnimatorStateInfo(0).IsName("SpearAttack")) {
-			return;
-		}
-		else {
-			if (!animator.GetCurrentAnimatorStateInfo(0).IsName("AxeAttack")) {
-				SetAxeAttack(false);
-			}
-			if(!animator.GetCurrentAnimatorStateInfo(0).IsName("SpearAttack")) {
-				SetSpearAttack(false);
-			}
-		}
+		
 		
         
 		if (Input.GetKey(KeyCode.Alpha1)) {
@@ -42,7 +32,11 @@ public class Weapon : MonoBehaviour {
 			ChangeWeapon(WeaponTypes.Axe);
 		}
 		timer += Time.deltaTime;
-		if(timer > fireRate) {
+		
+		
+		
+		
+		if (timer > fireRate) {
 			if (Input.GetButton("Fire1")) {
 				timer = 0f;
 				FireWeapon();
@@ -69,14 +63,23 @@ public class Weapon : MonoBehaviour {
 		Ray ray = Camera.main.ViewportPointToRay(Vector3.one * 0.5f);
 		Debug.DrawRay(ray.origin, ray.direction * 100, Color.red, 2f);
 	}
-	private void SetSpearAttack(bool value) {
+	public void SetSpearAttack(bool value) {
 		animator.SetBool("spearAttack", value);
+		if (value) {
+			animator.Play("SpearAttack");
+		}
 	}
 
-	private void SetAxeAttack(bool value) {
-		animator.SetBool("axeAttack", value);
+	public void SetAxeAttack(bool value) {
+		
+		if (value) {
+			animator.Play("AxeAttack");
+		}
+		
 	}
 	private void ChangeWeapon(WeaponTypes weapon) {
 		currentWeapon = weapon;
 	}
+
+	
 }

@@ -397,6 +397,24 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1006444653 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 100008, guid: b04039bd6f0856e44984dd743fcb3fd6,
+    type: 3}
+  m_PrefabInstance: {fileID: 2105764702}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1006444654
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1006444653}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f493216352fa4324ca039d92a349ef26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1113922597
 GameObject:
   m_ObjectHideFlags: 0
@@ -433,7 +451,7 @@ MonoBehaviour:
   m_StreamingVersion: 20170927
   m_Priority: 10
   m_LookAt: {fileID: 1634921793}
-  m_Follow: {fileID: 0}
+  m_Follow: {fileID: 1634921793}
   m_Lens:
     FieldOfView: 40
     OrthographicSize: 10

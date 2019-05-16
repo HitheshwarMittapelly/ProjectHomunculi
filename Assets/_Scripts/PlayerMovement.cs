@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour {
-	[SerializeField]
-	private float moveSpeed = 3f;
-	[SerializeField]
-	private float turnSpeed = 5f;
+	
+	public float moveSpeed = 3f;
+	
+	public float turnSpeed = 5f;
 
 	private CharacterController characterController;
 	private Animator animator;

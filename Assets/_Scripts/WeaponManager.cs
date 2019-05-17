@@ -3,14 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Weapon : MonoBehaviour {
+public class WeaponManager : MonoBehaviour {
 	
 	
 	[Range(0.2f,1.5f)]
 	public float fireRate = 1f;
 	
 	public float damage = 1f;
-
+	public GameObject spearWeapon;
+	public GameObject axeWeapon;
 	private WeaponTypes currentWeapon;
 	private float timer;
 	private Animator animator;
@@ -78,8 +79,21 @@ public class Weapon : MonoBehaviour {
 		
 	}
 	private void ChangeWeapon(WeaponTypes weapon) {
+		axeWeapon.SetActive(false);
+		spearWeapon.SetActive(false);
 		currentWeapon = weapon;
+		switch (currentWeapon) {
+			case WeaponTypes.Axe:
+				axeWeapon.SetActive(true);
+				break;
+			case WeaponTypes.Spear:
+				spearWeapon.SetActive(true);
+				break;
+		}
 	}
 
+	public void WeaponTriggerCallback(Collider collider) {
+
+	}
 	
 }

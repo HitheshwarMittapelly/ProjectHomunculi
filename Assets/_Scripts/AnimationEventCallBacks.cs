@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class AnimationEventCallBacks : MonoBehaviour
 {
-	private Weapon weaponScript;
+	private WeaponManager weaponScript;
 
 	private void Start() {
-		weaponScript = GetComponentInParent<Weapon>();
+		weaponScript = GetComponentInParent<WeaponManager>();
 
 	}
 	public void StabbingEndEvent() {

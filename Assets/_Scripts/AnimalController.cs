@@ -19,7 +19,8 @@ public class AnimalController : MonoBehaviour
 	public void TakeDamage(float damageAmount) {
 		health -= damageAmount;
 		if(health <= 0) {
-			Destroy(this);
+			Destroy(gameObject);
 		}
 	}
+
 }

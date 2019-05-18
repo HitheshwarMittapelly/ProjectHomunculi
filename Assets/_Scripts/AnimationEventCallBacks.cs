@@ -4,19 +4,19 @@ using UnityEngine;
 
 public class AnimationEventCallBacks : MonoBehaviour
 {
-	private WeaponManager weaponScript;
+	private WeaponManager weaponManager;
 
 	private void Start() {
-		weaponScript = GetComponentInParent<WeaponManager>();
+		weaponManager = GetComponentInParent<WeaponManager>();
 
 	}
 	public void StabbingEndEvent() {
 		
-		weaponScript.SetSpearAttack(false);
+		weaponManager.SetSpearAttack(false);
 	}
 	public void AxeEndEvent() {
 	
-		weaponScript.SetAxeAttack(false);
+		weaponManager.SetAxeAttack(false);
 	}
 
 }

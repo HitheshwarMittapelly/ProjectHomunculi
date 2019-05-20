@@ -13,11 +13,14 @@ public class WeaponManager : MonoBehaviour {
 	public GameObject spearWeapon;
 	public GameObject axeWeapon;
 	private WeaponTypes currentWeapon;
+	private PlayerStates currentPlayerState;
 	private float timer;
 	private Animator animator;
 	private enum WeaponTypes { None,Spear, Axe};
+	private enum PlayerStates { Idle, Attacking};
 	private void Start() {
 		currentWeapon = WeaponTypes.None;
+		currentPlayerState = PlayerStates.Idle;
 		animator = GetComponentInChildren<Animator>();
 	}
 
@@ -51,6 +54,7 @@ public class WeaponManager : MonoBehaviour {
 			case WeaponTypes.None: break;
 			case WeaponTypes.Axe:
 				SetAxeAttack(true);
+				
 				break;
 			case WeaponTypes.Spear:
 				SetSpearAttack(true);
@@ -67,16 +71,24 @@ public class WeaponManager : MonoBehaviour {
 	public void SetSpearAttack(bool value) {
 		animator.SetBool("spearAttack", value);
 		if (value) {
+			currentPlayerState = PlayerStates.Attacking;
 			animator.Play("SpearAttack");
+		}
+		else {
+			currentPlayerState = PlayerStates.Idle;
 		}
 	}
 
 	public void SetAxeAttack(bool value) {
 		
 		if (value) {
+			currentPlayerState = PlayerStates.Attacking;
 			animator.Play("AxeAttack");
 		}
-		
+		else {
+			currentPlayerState = PlayerStates.Idle;
+		}
+
 	}
 	private void ChangeWeapon(WeaponTypes weapon) {
 		axeWeapon.SetActive(false);
@@ -93,7 +105,10 @@ public class WeaponManager : MonoBehaviour {
 	}
 
 	public void WeaponTriggerCallback(Collider collider) {
-
+		if(currentPlayerState == PlayerStates.Attacking) {
+			Debug.Log(collider.gameObject);
+			collider.gameObject.GetComponent<AnimalController>().TakeDamage(10);
+		}
 	}
 	
 }

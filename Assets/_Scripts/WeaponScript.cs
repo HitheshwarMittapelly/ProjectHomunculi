@@ -11,8 +11,11 @@ public class WeaponScript : MonoBehaviour
 		}
 	}
 	private void OnTriggerEnter(Collider other) {
+		
 		if (other.gameObject.GetComponent<AnimalController>()) {
+		
 			parentWeaponManager.WeaponTriggerCallback(other);
 		}
 	}
+
 }

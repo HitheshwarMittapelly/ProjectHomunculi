@@ -11,7 +11,7 @@ public class AnimalController : MonoBehaviour
     void Start()
     {
 		animatorController = GetComponent<Animator>();
-		//controller = GetComponent<CharacterController>();
+		controller = GetComponent<CharacterController>();
 
 	}
 
@@ -19,7 +19,7 @@ public class AnimalController : MonoBehaviour
     void Update()
     {
 		Vector3 vel = transform.forward * speed * Time.deltaTime;
-		//controller.SimpleMove(vel);
+		controller.SimpleMove(vel);
 		//transform.Translate(vel);
 		animatorController.SetFloat("Blend", vel.magnitude);
 

@@ -21,9 +21,9 @@ public class GOManager : MonoBehaviour
 		if(instance == null) {
 			instance = this;
 		}
-		allAnimals = new List<GameObject>();
-		SpawnPointCalculation();
-		SpawnAnimals();
+		//allAnimals = new List<GameObject>();
+		//SpawnPointCalculation();
+		//SpawnAnimals();
 	}
 
 	private static void SpawnPointCalculation() {

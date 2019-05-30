@@ -39,6 +39,7 @@ public class AIController : MonoBehaviour
 				}
 				else if (animal.animalAIState == AnimalController.AIStates.Idle) {
 					animal.MoveToRandomPoint();
+					currentlyIdleAnimals--;
 				}
 			}
 		}

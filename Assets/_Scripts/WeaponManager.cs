@@ -16,9 +16,11 @@ public class WeaponManager : MonoBehaviour {
 	private PlayerStates currentPlayerState;
 	private float timer;
 	private Animator animator;
+	private bool canDamage;
 	private enum WeaponTypes { None,Spear, Axe};
 	private enum PlayerStates { Idle, Attacking};
 	private void Start() {
+		canDamage = true;
 		currentWeapon = WeaponTypes.None;
 		currentPlayerState = PlayerStates.Idle;
 		animator = GetComponentInChildren<Animator>();
@@ -50,13 +52,17 @@ public class WeaponManager : MonoBehaviour {
 	}
 
 	private void FireWeapon() {
+		
 		switch (currentWeapon) {
+			
 			case WeaponTypes.None: break;
 			case WeaponTypes.Axe:
+
 				SetAxeAttack(true);
-				
+				canDamage = true;
 				break;
 			case WeaponTypes.Spear:
+				canDamage = true;
 				SetSpearAttack(true);
 				break;
 
@@ -105,7 +111,8 @@ public class WeaponManager : MonoBehaviour {
 	}
 
 	public void WeaponTriggerCallback(Collider collider) {
-		if(currentPlayerState == PlayerStates.Attacking) {
+		if(currentPlayerState == PlayerStates.Attacking && canDamage) {
+			canDamage = false;
 			Debug.Log(collider.gameObject);
 			collider.gameObject.GetComponent<AnimalController>().TakeDamage(10);
 		}

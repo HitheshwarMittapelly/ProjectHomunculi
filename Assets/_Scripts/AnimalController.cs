@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class AnimalController : MonoBehaviour
+public class AnimalController : Health
 {
 	private CharacterController controller;
 	private Animator animatorController;
@@ -14,17 +14,17 @@ public class AnimalController : MonoBehaviour
 	public int playerSearchRadius = 3;
 	public int randomSearchRadius = 10;
 	public LayerMask playerMask;
-	public float health;
+	
 	public float speed;
 	[HideInInspector]
 	public AIStates animalAIState;
 	private Vector3 lastPos;
-
+	private bool canDamage;
 	public enum AIStates { PursuingPlayer, ReadyToAttack,AttackingPlayer, Roaming, Idle};
     void Start()
     {
 		animatorController = GetComponent<Animator>();
-		
+		canDamage = true;
 		navMeshAgent = GetComponent<NavMeshAgent>();
 		animalAIState = AIStates.Idle;
 		playerTransform = null;
@@ -36,11 +36,12 @@ public class AnimalController : MonoBehaviour
     void Update()
     {
 		if (navMeshAgent) {
-			
+			animatorController.SetFloat("Blend", navMeshAgent.velocity.magnitude);
 			if (animalAIState == AIStates.PursuingPlayer) {
 				if (!CheckIfReachedPlayer()) {
 					if (Vector3.Distance(playerTransform.position, lastPos) > repathDistance) {
 						lastPos = playerTransform.position;
+						Debug.Log("Repathing");
 						navMeshAgent.destination = playerTransform.position;
 					};
 				}
@@ -49,7 +50,7 @@ public class AnimalController : MonoBehaviour
 			else if(animalAIState == AIStates.Roaming){
 				CheckIfReachedDestination();
 			}
-			animatorController.SetFloat("Blend", navMeshAgent.velocity.magnitude);
+			
 		}
 		
 		//Vector3 vel = transform.forward * speed * Time.deltaTime;
@@ -82,15 +83,11 @@ public class AnimalController : MonoBehaviour
 		}
 		return false;
 	}
-	public void TakeDamage(float damageAmount) {
-		health -= damageAmount;
-		if(health <= 0) {
-			Die();
-		}
-	}
+	
 
-	public void Die() {
-		GOManager.RemoveAnimalFromList(gameObject);
+	public override void Die() {
+		base.Die();
+		//GOManager.RemoveAnimalFromList(gameObject);
 		Destroy(gameObject);
 	}
 
@@ -124,18 +121,22 @@ public class AnimalController : MonoBehaviour
 	}
 
 	public void OnReachingPlayer() {
+		Debug.Log("Reached player");
 		playerTransform = null;
 		animalAIState = AIStates.ReadyToAttack;
 		
 		AttackPlayer();
-		Debug.Log("Reached player");
+		
 		
 		
 	}
 
 	public void AttackPlayer() {
+		Debug.Log("Attacking");
 		
+		animatorController.SetBool("attack", true);
 		animalAIState = AIStates.AttackingPlayer;
+		canDamage = true;
 	}
 	public void OnRoamingComplete() {
 		Debug.Log("Reached roam point");
@@ -157,7 +158,27 @@ public class AnimalController : MonoBehaviour
 	}
 
 
-	//public void AttackEndEvent() {
+	public void AnimalAttackEndEvent() {
+		Debug.Log("Attack ends");
+		animatorController.SetBool("attack", false);
+		animalAIState = AIStates.ReadyToAttack;
+		StartCoroutine("SetToIdleAfterSecs");
+		canDamage = true;
+	}
 
-	//}
+	private IEnumerator SetToIdleAfterSecs() {
+		yield return new WaitForSeconds(2);
+		animalAIState = AIStates.Idle;
+		AIController.UpdateIdleAnimals();
+	}
+
+	private void OnTriggerStay(Collider other) {
+		if(animalAIState == AIStates.AttackingPlayer && canDamage) {
+			canDamage = false;
+			if (other.GetComponent<Health>()) {
+				other.GetComponent<Health>().TakeDamage(10);
+			}
+		}
+	}
+
 }

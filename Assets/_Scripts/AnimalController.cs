@@ -174,8 +174,9 @@ public class AnimalController : Health
 
 	private void OnTriggerStay(Collider other) {
 		if(animalAIState == AIStates.AttackingPlayer && canDamage) {
-			canDamage = false;
+			
 			if (other.GetComponent<Health>()) {
+				canDamage = false;
 				other.GetComponent<Health>().TakeDamage(10);
 			}
 		}

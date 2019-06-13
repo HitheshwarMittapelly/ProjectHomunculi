@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class Health : MonoBehaviour
 {
-	public int health;
+	public float health;
     
 
-	public virtual void TakeDamage(int damage) {
+	public virtual void TakeDamage(float damage) {
 		health -= damage;
 		if(health <= 0) {
 			Die();

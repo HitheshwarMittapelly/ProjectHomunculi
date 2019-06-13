@@ -12,18 +12,20 @@ public class WeaponManager : MonoBehaviour {
 	public float damage = 1f;
 	public GameObject spearWeapon;
 	public GameObject axeWeapon;
+	private PlayerController playerController;
 	private WeaponTypes currentWeapon;
 	private PlayerStates currentPlayerState;
 	private float timer;
 	private Animator animator;
 	private bool canDamage;
-	private enum WeaponTypes { None,Spear, Axe};
+	public enum WeaponTypes { None,Spear, Axe};
 	private enum PlayerStates { Idle, Attacking};
 	private void Start() {
 		canDamage = true;
 		currentWeapon = WeaponTypes.None;
 		currentPlayerState = PlayerStates.Idle;
 		animator = GetComponentInChildren<Animator>();
+		playerController = GetComponentInParent<PlayerController>();
 	}
 
 
@@ -96,7 +98,7 @@ public class WeaponManager : MonoBehaviour {
 		}
 
 	}
-	private void ChangeWeapon(WeaponTypes weapon) {
+	public void ChangeWeapon(WeaponTypes weapon) {
 		axeWeapon.SetActive(false);
 		spearWeapon.SetActive(false);
 		currentWeapon = weapon;
@@ -114,7 +116,7 @@ public class WeaponManager : MonoBehaviour {
 		if(currentPlayerState == PlayerStates.Attacking && canDamage) {
 			canDamage = false;
 			Debug.Log(collider.gameObject);
-			collider.gameObject.GetComponent<AnimalController>().TakeDamage(10);
+			collider.gameObject.GetComponent<AnimalController>().TakeDamage(playerController.GetCurrentDamagePower());
 		}
 	}
 	

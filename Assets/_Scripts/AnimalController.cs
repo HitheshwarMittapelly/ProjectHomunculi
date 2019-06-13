@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-
+using HelperClasses;
 public class AnimalController : Health
 {
 	private CharacterController controller;
@@ -18,11 +18,15 @@ public class AnimalController : Health
 	public float speed;
 	[HideInInspector]
 	public AIStates animalAIState;
+	public static EventPublisher Events { get { return _events; } }
+	private static EventPublisher _events = new EventPublisher();
+
 	private Vector3 lastPos;
 	private bool canDamage;
 	public enum AIStates { PursuingPlayer, ReadyToAttack,AttackingPlayer, Roaming, Idle};
     void Start()
     {
+		
 		animatorController = GetComponent<Animator>();
 		canDamage = true;
 		navMeshAgent = GetComponent<NavMeshAgent>();
@@ -40,9 +44,16 @@ public class AnimalController : Health
 			if (animalAIState == AIStates.PursuingPlayer) {
 				if (!CheckIfReachedPlayer()) {
 					if (Vector3.Distance(playerTransform.position, lastPos) > repathDistance) {
-						lastPos = playerTransform.position;
-						Debug.Log("Repathing");
-						navMeshAgent.destination = playerTransform.position;
+						
+						if (TryToFindPlayer()) {
+							lastPos = playerTransform.position;
+							Debug.Log("Repathing");
+							navMeshAgent.destination = playerTransform.position;
+						}
+						else {
+							animalAIState = AIStates.Roaming;
+						}
+						
 					};
 				}
 				
@@ -84,9 +95,11 @@ public class AnimalController : Health
 		return false;
 	}
 	
+	
 
 	public override void Die() {
 		base.Die();
+		Events.Publish(AnimalEvents.AnimalDeath,null);
 		//GOManager.RemoveAnimalFromList(gameObject);
 		Destroy(gameObject);
 	}
@@ -125,6 +138,7 @@ public class AnimalController : Health
 		playerTransform = null;
 		animalAIState = AIStates.ReadyToAttack;
 		
+		ChoiceManager.instance.ShowFirstTimeCombatDialog();
 		AttackPlayer();
 		
 		
@@ -132,6 +146,7 @@ public class AnimalController : Health
 	}
 
 	public void AttackPlayer() {
+		
 		Debug.Log("Attacking");
 		
 		animatorController.SetBool("attack", true);
@@ -181,5 +196,8 @@ public class AnimalController : Health
 			}
 		}
 	}
+	public enum AnimalEvents {
+		AnimalDeath,
 
+	}
 }

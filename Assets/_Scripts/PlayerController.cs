@@ -24,6 +24,8 @@ public class PlayerController : Health {
 	private bool backwardTimerFlag;
 	private Vector3 moveDirection;
 	private EventListener animalDeathEventListener;
+	private bool inWater;
+	private bool useGravity;
 	private void Awake() {
 		characterController = GetComponent<CharacterController>();
 		animator = GetComponentInChildren<Animator>();
@@ -32,6 +34,8 @@ public class PlayerController : Health {
 		//Cursor.lockState = CursorLockMode.Locked;
 	}
 	private void Start() {
+		inWater = false;
+		useGravity = true;
 		currentStrength = baseStrength;
 		forwardTimer = 0;
 		backwardTimer = 0;
@@ -54,24 +58,31 @@ public class PlayerController : Health {
 	
 		float horizontal = Input.GetAxis("Mouse X");
 		float vertical = Input.GetAxis("Vertical");
-
-		if (characterController.isGrounded) {
-			// We are grounded, so recalculate
-			// move direction directly from axes
-
-			moveDirection = transform.forward * vertical /** GetCurrentMoveSpeed()*/;
+		if (!inWater) {
 			
+			if (characterController.isGrounded) {
+				// We are grounded, so recalculate
+				// move direction directly from axes
 
-			if (Input.GetKeyDown(KeyCode.Space)) {
-				moveDirection.y = GetCurrentJumpPower();
-				
+				moveDirection = transform.forward * vertical * GetCurrentMoveSpeed();
+				animator.SetFloat("Trigger", Mathf.Abs(vertical));
+
+				if (Input.GetKeyDown(KeyCode.Space)) {
+					moveDirection.y = GetCurrentJumpPower();
+
+				}
 			}
 		}
-
+		else {
+			moveDirection = transform.forward * vertical * GetCurrentMoveSpeed();
+			
+		}
 		// Apply gravity. Gravity is multiplied by deltaTime twice (once here, and once below
 		// when the moveDirection is multiplied by deltaTime). This is because gravity should be applied
 		// as an acceleration (ms^-2)
-		moveDirection.y -= gravity * Time.deltaTime;
+		if (useGravity) {
+			moveDirection.y -= gravity * Time.deltaTime;
+		}
 		characterController.Move(moveDirection * Time.deltaTime);
 		transform.Rotate(Vector3.up, horizontal * turnSpeed * Time.deltaTime);
 		if (vertical == 1) {
@@ -118,7 +129,7 @@ public class PlayerController : Health {
 			backwardTimerFlag = false;
 		}
 		
-		animator.SetFloat("Trigger", Mathf.Abs(vertical));
+		
 	
 		
 
@@ -248,5 +259,20 @@ public class PlayerController : Health {
 
 	public void EquipWeapon() {
 		weaponManager.ChangeWeapon(WeaponManager.WeaponTypes.Axe);
+	}
+
+	private void OnTriggerEnter(Collider other) {
+		if(other.gameObject.layer == LayerMask.NameToLayer("Water")) {
+			Debug.Log("Oooh I'm in water!!!");
+			inWater = true;
+			animator.SetBool("swim", true);
+		}
+	}
+	private void OnTriggerExit(Collider other) {
+		if (other.gameObject.layer == LayerMask.NameToLayer("Water")) {
+			Debug.Log("Oooh I'm out of water!!!");
+			inWater = false;
+			animator.SetBool("swim", false);
+		}
 	}
 }

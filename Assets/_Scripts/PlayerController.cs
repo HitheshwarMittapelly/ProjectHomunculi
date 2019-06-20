@@ -9,7 +9,7 @@ public class PlayerController : Health {
 	public float baseDamagePower = 10;
 	public float baseJumpPower = 5;
 	public float turnSpeed = 5f;
-
+	public float gravity = 20f;
 	private float currentStrength;
 	public UI_Progressbar healthBar;
 	public UI_Progressbar strengthBar;
@@ -22,6 +22,7 @@ public class PlayerController : Health {
 	private float idleTimer;
 	private bool forwardTimerFlag;
 	private bool backwardTimerFlag;
+	private Vector3 moveDirection;
 	private EventListener animalDeathEventListener;
 	private void Awake() {
 		characterController = GetComponent<CharacterController>();
@@ -44,14 +45,36 @@ public class PlayerController : Health {
 	private void AnimalDeathCallback(int eventCode, object data) {
 		if((AnimalController.AnimalEvents)eventCode == AnimalController.AnimalEvents.AnimalDeath) {
 			IncreaseDamagePower(2);
+			IncreaseStrength(-4);
 			Debug.Log("animal death");
 		}
 	}
 
 	void Update () {
+	
 		float horizontal = Input.GetAxis("Mouse X");
 		float vertical = Input.GetAxis("Vertical");
-		if(vertical == 1) {
+
+		if (characterController.isGrounded) {
+			// We are grounded, so recalculate
+			// move direction directly from axes
+
+			moveDirection = transform.forward * vertical /** GetCurrentMoveSpeed()*/;
+			
+
+			if (Input.GetKeyDown(KeyCode.Space)) {
+				moveDirection.y = GetCurrentJumpPower();
+				
+			}
+		}
+
+		// Apply gravity. Gravity is multiplied by deltaTime twice (once here, and once below
+		// when the moveDirection is multiplied by deltaTime). This is because gravity should be applied
+		// as an acceleration (ms^-2)
+		moveDirection.y -= gravity * Time.deltaTime;
+		characterController.Move(moveDirection * Time.deltaTime);
+		transform.Rotate(Vector3.up, horizontal * turnSpeed * Time.deltaTime);
+		if (vertical == 1) {
 			idleTimer = 0;
 			forwardTimer += Time.deltaTime;
 			if(forwardTimer > 5f && !forwardTimerFlag) {
@@ -96,14 +119,17 @@ public class PlayerController : Health {
 		}
 		
 		animator.SetFloat("Trigger", Mathf.Abs(vertical));
-		transform.Rotate(Vector3.up, horizontal * turnSpeed * Time.deltaTime);
-		if (vertical!=0) {
-			characterController.SimpleMove(vertical * GetCurrentMoveSpeed() * transform.forward);
-		}
+	
+		
+
+		
+	
 		
 		
 
 	}
+
+	
 	public override void TakeDamage(float damage) {
 		base.TakeDamage(damage);
 		Debug.Log("Player taking damage - health is - " + health);
@@ -142,7 +168,13 @@ public class PlayerController : Health {
 	}
 
 	public void SetCurrentStrength() {
-		Mathf.Clamp(currentStrength, currentStrength, baseStrength);
+		if(currentStrength > baseStrength) {
+			currentStrength = baseStrength;
+		}else if(currentStrength < 0) {
+			currentStrength = 0;
+		}
+		Mathf.Clamp(currentStrength, 0, baseStrength);
+		
 		if (health <= 100 && health > 80) {
 			currentStrength = 1 * currentStrength;
 		}
@@ -150,6 +182,7 @@ public class PlayerController : Health {
 			currentStrength *= 0.75f;
 		}
 		else {
+
 			currentStrength *= 0.5f;
 		}
 		Mathf.Clamp(currentStrength, 20, baseStrength);
@@ -170,16 +203,17 @@ public class PlayerController : Health {
 
 	private float GetCurrentJumpPower() {
 		float currentJumpPower = baseJumpPower;
+		//Debug.Log(GetStrengthFactor());
 		return GetStrengthFactor() * currentJumpPower;
 	}
 
 	private float GetStrengthFactor() {
 		float factor = 1f;
 		
-		if (currentStrength <= 1 * baseStrength && health > 0.8f * baseStrength) {
+		if (currentStrength <= 1 * baseStrength && currentStrength > 0.8f * baseStrength) {
 			factor = 1f;
 		}
-		else if (currentStrength <= 0.8f * baseStrength && health > 0.5f * baseStrength) {
+		else if (currentStrength <= 0.8f * baseStrength && currentStrength > 0.5f * baseStrength) {
 			factor = 0.75f ;
 		}
 		else {

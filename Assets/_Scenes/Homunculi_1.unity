@@ -2445,8 +2445,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: 100
-  moveSpeed: 10
+  baseMoveSpeed: 6
+  baseStrength: 40
+  baseDamagePower: 10
+  baseJumpPower: 10
   turnSpeed: 150
+  gravity: 20
   healthBar: {fileID: 867386656}
   strengthBar: {fileID: 1917990304}
 --- !u!114 &1634921796

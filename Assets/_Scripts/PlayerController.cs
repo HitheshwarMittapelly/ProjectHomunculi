@@ -25,7 +25,10 @@ public class PlayerController : Health {
 	private Vector3 moveDirection;
 	private EventListener animalDeathEventListener;
 	private bool inWater;
+	private bool onLog;
 	private bool useGravity;
+	private GameObject logGameObject;
+	private Vector3 waterForwardDirection;
 	private void Awake() {
 		characterController = GetComponent<CharacterController>();
 		animator = GetComponentInChildren<Animator>();
@@ -55,87 +58,119 @@ public class PlayerController : Health {
 	}
 
 	void Update () {
-	
-		float horizontal = Input.GetAxis("Mouse X");
-		float vertical = Input.GetAxis("Vertical");
-		if (!inWater) {
+		
+			float horizontal = Input.GetAxis("Mouse X");
+			float vertical = Input.GetAxis("Vertical");
+		if (onLog) {
+			transform.position = logGameObject.GetComponent<LogController>().playerStandPosition.position;
+			vertical = 0;
+			useGravity = false;
+		}
+		else {
+			useGravity = true;
 			
+		}
+		animator.SetFloat("Trigger", Mathf.Abs(vertical));
+		if (!inWater && !onLog) {
+
 			if (characterController.isGrounded) {
 				// We are grounded, so recalculate
 				// move direction directly from axes
 
 				moveDirection = transform.forward * vertical * GetCurrentMoveSpeed();
 				animator.SetFloat("Trigger", Mathf.Abs(vertical));
-
+				   
 				if (Input.GetKeyDown(KeyCode.Space)) {
 					moveDirection.y = GetCurrentJumpPower();
 
 				}
 			}
-		}
-		else {
-			moveDirection = transform.forward * vertical * GetCurrentMoveSpeed();
-			
-		}
-		// Apply gravity. Gravity is multiplied by deltaTime twice (once here, and once below
-		// when the moveDirection is multiplied by deltaTime). This is because gravity should be applied
-		// as an acceleration (ms^-2)
-		if (useGravity) {
-			moveDirection.y -= gravity * Time.deltaTime;
-		}
-		characterController.Move(moveDirection * Time.deltaTime);
-		transform.Rotate(Vector3.up, horizontal * turnSpeed * Time.deltaTime);
-		if (vertical == 1) {
-			idleTimer = 0;
-			forwardTimer += Time.deltaTime;
-			if(forwardTimer > 5f && !forwardTimerFlag) {
-				currentStrength -= 3;
-				SetCurrentStrength();
-				forwardTimerFlag = true;
 			}
-			if(forwardTimer > 10f && forwardTimerFlag) {
-				currentStrength -= 3;
-				SetCurrentStrength();
-				forwardTimerFlag = false;
-				forwardTimer = 0;
-				IncreaseMoveSpeed(1);
-			}
-		}else if(vertical == -1) {
-			idleTimer = 0;
-			backwardTimer += Time.deltaTime;
-			if (backwardTimer > 5f && !backwardTimerFlag) {
-				currentStrength -= 3;
-				SetCurrentStrength();
-				backwardTimerFlag = true;
-			}
-			if (backwardTimer > 10f && backwardTimerFlag) {
-				currentStrength -= 3;
-				SetCurrentStrength();
-				backwardTimerFlag = false;
-				backwardTimer = 0;
-				IncreaseMoveSpeed(1);
-			}
-		}else if (Mathf.Approximately(vertical, 0)) {
-			idleTimer += Time.deltaTime;
-			if(idleTimer > 7f) {
-				currentStrength += 5;
-				
-				SetCurrentStrength();
-				idleTimer = 0;
-			}
-			forwardTimer = 0;
-			backwardTimer = 0;
-			forwardTimerFlag = false;
-			backwardTimerFlag = false;
-		}
-		
-		
-	
-		
+			else {
+				var waterCurrent = (Mathf.Abs(vertical) / GetStrengthFactor());
 
-		
-	
-		
+				moveDirection = transform.forward * (vertical) * GetCurrentMoveSpeed();
+				if (vertical == 0) {
+					moveDirection = -(waterForwardDirection * waterCurrent * GetCurrentMoveSpeed());
+				}
+				if (waterCurrent > Mathf.Abs(vertical)) {
+
+					if (Mathf.Sign(transform.forward.z * vertical) == Mathf.Sign(waterForwardDirection.z)) {
+						Debug.Log("Moving against");
+						var moveVector = new Vector3(transform.forward.x, transform.forward.y, -waterForwardDirection.z);
+						moveDirection = moveVector * (waterCurrent - Mathf.Abs(vertical)) * GetCurrentMoveSpeed();
+					}
+					else if (Mathf.Sign(transform.forward.z * vertical) == Mathf.Sign(-waterForwardDirection.z)) {
+						Debug.Log("Moving to the flow");
+						var moveVector = new Vector3(transform.forward.x, transform.forward.y, -waterForwardDirection.z);
+						moveDirection = GetCurrentMoveSpeed() * (Mathf.Abs(vertical) + waterCurrent) * moveVector;
+					}
+
+
+				}
+
+			}
+			// Apply gravity. Gravity is multiplied by deltaTime twice (once here, and once below
+			// when the moveDirection is multiplied by deltaTime). This is because gravity should be applied
+			// as an acceleration (ms^-2)
+			if (useGravity) {
+				moveDirection.y -= gravity * Time.deltaTime;
+			}
+			characterController.Move(moveDirection * Time.deltaTime);
+			transform.Rotate(Vector3.up, horizontal * turnSpeed * Time.deltaTime);
+			if (vertical == 1) {
+				idleTimer = 0;
+				forwardTimer += Time.deltaTime;
+				if (forwardTimer > 5f && !forwardTimerFlag) {
+					currentStrength -= 3;
+					SetCurrentStrength();
+					forwardTimerFlag = true;
+				}
+				if (forwardTimer > 10f && forwardTimerFlag) {
+					currentStrength -= 3;
+					SetCurrentStrength();
+					forwardTimerFlag = false;
+					forwardTimer = 0;
+					IncreaseMoveSpeed(1);
+				}
+			}
+			else if (vertical == -1) {
+				idleTimer = 0;
+				backwardTimer += Time.deltaTime;
+				if (backwardTimer > 5f && !backwardTimerFlag) {
+					currentStrength -= 3;
+					SetCurrentStrength();
+					backwardTimerFlag = true;
+				}
+				if (backwardTimer > 10f && backwardTimerFlag) {
+					currentStrength -= 3;
+					SetCurrentStrength();
+					backwardTimerFlag = false;
+					backwardTimer = 0;
+					IncreaseMoveSpeed(1);
+				}
+			}
+			else if (Mathf.Approximately(vertical, 0)) {
+				idleTimer += Time.deltaTime;
+				if (idleTimer > 7f) {
+					currentStrength += 5;
+
+					SetCurrentStrength();
+					idleTimer = 0;
+				}
+				forwardTimer = 0;
+				backwardTimer = 0;
+				forwardTimerFlag = false;
+				backwardTimerFlag = false;
+			}
+
+
+
+
+
+
+
+
 		
 
 	}
@@ -262,17 +297,45 @@ public class PlayerController : Health {
 	}
 
 	private void OnTriggerEnter(Collider other) {
-		if(other.gameObject.layer == LayerMask.NameToLayer("Water")) {
-			Debug.Log("Oooh I'm in water!!!");
-			inWater = true;
-			animator.SetBool("swim", true);
+		if(other.gameObject.layer == LayerMask.NameToLayer("Water") &&!onLog) {
+			if (!onLog) {
+			
+				inWater = true;
+				animator.SetBool("swim", true);
+				waterForwardDirection = other.gameObject.transform.forward;
+				
+			}
+		}
+		else if (other.gameObject.layer == LayerMask.NameToLayer("Log") && !onLog) {
+			logGameObject = other.gameObject;
+			onLog = true;
+			var logController = logGameObject.GetComponent<LogController>();
+			logController.playerOnLog = true;
+			transform.position = logController.playerStandPosition.position;
+			transform.SetParent(logGameObject.transform);
 		}
 	}
 	private void OnTriggerExit(Collider other) {
 		if (other.gameObject.layer == LayerMask.NameToLayer("Water")) {
-			Debug.Log("Oooh I'm out of water!!!");
-			inWater = false;
-			animator.SetBool("swim", false);
+			if (inWater) {
+			
+				inWater = false;
+				animator.SetBool("swim", false);
+				waterForwardDirection = Vector3.zero;
+			}
+			if (onLog) {
+				transform.SetParent(null);
+							
+				onLog = false;
+				var logController = logGameObject.GetComponent<LogController>();
+				transform.position = logController.playerStandPosition.position - (Vector3.right * 5f);
+				logController.playerOnLog = false;
+				logController.GoBackToInitialPosition();
+				logGameObject = null;
+				
+			
+			}
 		}
+		
 	}
 }
